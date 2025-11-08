@@ -34,10 +34,10 @@ Before you begin, ensure you have the following installed:
 
 ### 1. Clone the Repository
 
-```bash
-git clone https://github.com/mkcarter7/Birthday-API.git
-cd Birthday-API
-```
+cd ~/folder name
+git clone git@github.com:mkcarter7/Birthday-API.git "project name"
+# or using HTTPS:
+# git clone https://github.com/mkcarter7/projectname.git "projectname"
 
 ### 2. Install Dependencies
 
