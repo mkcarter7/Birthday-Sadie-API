@@ -12,6 +12,7 @@ faker = "*"
 autopep8 = "==2.0.0"
 pylint = "==2.15.5"
 pylint-django = "==2.5.3"
+firebase-admin = "*"
 
 [dev-packages]
 autopep8 = "2.0.0"
