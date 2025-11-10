@@ -162,3 +162,5 @@ cython_debug/
 # Documentation files
 *.md
 !README.md
+
+firebase-service-account.json
