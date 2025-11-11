@@ -13,6 +13,7 @@ from .gift_registry import GiftRegistryItemViewSet
 from .guest_book import GuestBookEntryViewSet
 from .game_score import GameScoreViewSet
 from .badges import BadgeViewSet, UserBadgeViewSet
+from .timeline import PartyTimelineEventViewSet, PartyTimelineEventSerializer
 
 # Import serializers if needed elsewhere
 from .game_score import GameScoreSerializer
@@ -34,12 +35,14 @@ __all__ = [
     'GameScoreViewSet',
     'BadgeViewSet',
     'UserBadgeViewSet',
+    'PartyTimelineEventViewSet',
     
     # Serializers
     'GameScoreSerializer',
     'GuestBookEntrySerializer',
     'BadgeSerializer',
     'UserBadgeSerializer',
+    'PartyTimelineEventSerializer',
 ]
 
 # ViewSet registry for programmatic access
@@ -52,4 +55,5 @@ VIEWSETS = {
     'game_score': GameScoreViewSet,
     'badge': BadgeViewSet,
     'user_badge': UserBadgeViewSet,
+    'timeline_event': PartyTimelineEventViewSet,
 }
