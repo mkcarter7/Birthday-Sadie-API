@@ -38,3 +38,31 @@ class Party(models.Model):
     @property
     def is_past(self):
         return self.date < timezone.now()
+
+
+class PartyTimelineEvent(models.Model):
+    """
+    Represents a scheduled item that appears on the public party timeline.
+    """
+
+    party = models.ForeignKey(
+        Party,
+        on_delete=models.CASCADE,
+        related_name='timeline_events',
+    )
+    time = models.TimeField()
+    activity = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    duration_minutes = models.PositiveIntegerField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['time']
+        verbose_name = 'Timeline Event'
+        verbose_name_plural = 'Timeline Events'
+
+    def __str__(self):
+        return f'{self.party.name} – {self.activity} ({self.time})'

@@ -1,4 +1,4 @@
-from .party import Party
+from .party import Party, PartyTimelineEvent
 from .photo import PartyPhoto, PhotoLike
 from .rsvp import RSVP
 from .guest_book import GuestBookEntry
@@ -16,4 +16,5 @@ __all__ = [
     'Badge',
     'UserBadge',
     'GameScore',
+    'PartyTimelineEvent',
 ]

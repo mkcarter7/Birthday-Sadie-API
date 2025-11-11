@@ -1,13 +1,32 @@
 from django.contrib import admin
-from .models import Party, PartyPhoto, PhotoLike, RSVP, GuestBookEntry, GiftRegistryItem, Badge, UserBadge, GameScore
+from .models import (
+    Party,
+    PartyPhoto,
+    PhotoLike,
+    RSVP,
+    GuestBookEntry,
+    GiftRegistryItem,
+    Badge,
+    UserBadge,
+    GameScore,
+    PartyTimelineEvent,
+)
 
 # Register Party model
+class PartyTimelineEventInline(admin.TabularInline):
+    model = PartyTimelineEvent
+    extra = 1
+    fields = ('time', 'activity', 'description', 'icon', 'duration_minutes', 'is_active')
+    ordering = ('time',)
+
+
 @admin.register(Party)
 class PartyAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'host', 'date', 'location', 'is_active', 'is_public']
     list_filter = ['is_active', 'is_public', 'date']
     search_fields = ['name', 'location', 'host__username']
     date_hierarchy = 'date'
+    inlines = [PartyTimelineEventInline]
 
 # Register PartyPhoto model
 @admin.register(PartyPhoto)
@@ -73,3 +92,11 @@ class GameScoreAdmin(admin.ModelAdmin):
     list_display = ['user', 'party', 'total_points', 'level']
     list_filter = ['party', 'level']
     search_fields = ['user__username']
+
+
+@admin.register(PartyTimelineEvent)
+class PartyTimelineEventAdmin(admin.ModelAdmin):
+    list_display = ['party', 'time', 'activity', 'is_active']
+    list_filter = ['party', 'is_active']
+    search_fields = ['activity', 'description', 'party__name']
+    ordering = ['party', 'time']
