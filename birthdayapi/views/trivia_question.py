@@ -22,8 +22,14 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class TriviaQuestionSerializer(serializers.ModelSerializer):
     """Serializer for TriviaQuestion model"""
-    party_name = serializers.CharField(source='party.name', read_only=True)
+    party_name = serializers.SerializerMethodField()
     options = serializers.SerializerMethodField()
+    
+    def get_party_name(self, obj):
+        """Return party name or None if party doesn't exist"""
+        if obj and obj.party:
+            return obj.party.name
+        return None
     
     class Meta:
         model = TriviaQuestion
@@ -37,7 +43,11 @@ class TriviaQuestionSerializer(serializers.ModelSerializer):
     
     def get_options(self, obj):
         """Return list of options, filtering out empty ones"""
-        return obj.get_options()
+        if obj is None:
+            return []
+        options = obj.get_options()
+        # Ensure we always return a list, even if empty
+        return options if isinstance(options, list) else []
     
     def to_internal_value(self, data):
         """Convert options array to individual option fields if needed"""
@@ -45,10 +55,15 @@ class TriviaQuestionSerializer(serializers.ModelSerializer):
         if 'options' in data and isinstance(data['options'], list):
             options = data['options']
             # Map array to individual fields - always set all fields when options array is provided
+            # This handles both full updates (PUT) and partial updates (PATCH)
             if len(options) > 0:
                 data['option_1'] = options[0]
+            else:
+                data['option_1'] = ''  # Clear if empty
             if len(options) > 1:
                 data['option_2'] = options[1]
+            else:
+                data['option_2'] = ''  # Clear if fewer than 2 options
             if len(options) > 2:
                 data['option_3'] = options[2]
             else:
@@ -64,19 +79,43 @@ class TriviaQuestionSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         """Validate the entire object, including correct_answer range"""
+        # For partial updates, we need to check existing instance values too
+        instance = self.instance
+        
         # Count how many options are provided
-        options_count = 2
-        if attrs.get('option_3'):
+        # Check both attrs (new values) and instance (existing values) for partial updates
+        option_1 = attrs.get('option_1') if 'option_1' in attrs else (instance.option_1 if instance else None)
+        option_2 = attrs.get('option_2') if 'option_2' in attrs else (instance.option_2 if instance else None)
+        option_3 = attrs.get('option_3') if 'option_3' in attrs else (instance.option_3 if instance else None)
+        option_4 = attrs.get('option_4') if 'option_4' in attrs else (instance.option_4 if instance else None)
+        
+        # Count non-empty options
+        options_count = 0
+        if option_1:
+            options_count = 1
+        if option_2:
+            options_count = 2
+        if option_3:
             options_count = 3
-        if attrs.get('option_4'):
+        if option_4:
             options_count = 4
         
         # Validate correct_answer is within range
+        # For partial updates, use existing correct_answer if not provided
         correct_answer = attrs.get('correct_answer')
-        if correct_answer is not None and correct_answer >= options_count:
-            raise serializers.ValidationError({
-                'correct_answer': f'correct_answer must be between 0 and {options_count - 1}'
-            })
+        if correct_answer is None and instance:
+            correct_answer = instance.correct_answer
+        
+        if correct_answer is not None:
+            if options_count == 0:
+                raise serializers.ValidationError({
+                    'options': 'At least one option is required'
+                })
+            
+            if correct_answer < 0 or correct_answer >= options_count:
+                raise serializers.ValidationError({
+                    'correct_answer': f'correct_answer must be between 0 and {options_count - 1} (you have {options_count} options)'
+                })
         
         return attrs
 
