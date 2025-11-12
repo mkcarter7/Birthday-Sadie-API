@@ -1,11 +1,27 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ..models import PartyPhoto, PhotoLike, Party
 from rest_framework import serializers
+from rest_framework import permissions
+
+
+class IsPhotoOwnerOrAdmin(permissions.BasePermission):
+    """
+    Allow deletion if the user is a staff/admin or the uploader of the photo.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if request.method not in permissions.SAFE_METHODS and request.method != 'DELETE':
+            return False
+        if request.user and request.user.is_authenticated:
+            if request.user.is_staff:
+                return True
+            return obj.uploaded_by == request.user
+        return False
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
@@ -56,9 +72,9 @@ class PartyPhotoViewSet(viewsets.ModelViewSet):
         # Anyone can view photos
         if self.action in ['list', 'retrieve', 'party_gallery']:
             return [AllowAny()]
-        # Only admins can delete photos
+        # allow owner or admin to delete
         elif self.action in ['destroy']:
-            return [IsAdminUser()]
+            return [IsPhotoOwnerOrAdmin()]
         # Authenticated users can upload and like
         else:
             return [IsAuthenticated()]
@@ -146,6 +162,9 @@ class PartyPhotoViewSet(viewsets.ModelViewSet):
             'message': f'Photo {"featured" if photo.is_featured else "unfeatured"}',
             'is_featured': photo.is_featured
         })
+
+    def perform_destroy(self, instance):
+        instance.delete()
     
     @action(detail=False, methods=['get'])
     def party_gallery(self, request):
