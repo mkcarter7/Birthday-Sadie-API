@@ -42,14 +42,29 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
     def get_or_create_user(self, uid, decoded_token):
         """
         Get or create a Django user based on Firebase UID
+        Automatically grants staff status to admin emails
         """
+        email = decoded_token.get('email', '')
+        
+        # List of admin emails that should have staff access
+        # You can add more emails here or move this to settings
+        admin_emails = [
+            'mkd.princess@gmail.com',  # Admin email
+            # Add more admin emails as needed
+        ]
+        
+        is_admin = email.lower() in [e.lower() for e in admin_emails]
+        
         try:
             # Try to get existing user by username (using UID)
             user = User.objects.get(username=uid)
+            # Update staff status if email matches admin list
+            if is_admin and not user.is_staff:
+                user.is_staff = True
+                user.save()
             return user, False
         except User.DoesNotExist:
             # Create new user
-            email = decoded_token.get('email', '')
             name = decoded_token.get('name', '')
             first_name = ''
             last_name = ''
@@ -65,7 +80,8 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
-                is_active=True
+                is_active=True,
+                is_staff=is_admin  # Grant staff status to admin emails
             )
             return user, True
 

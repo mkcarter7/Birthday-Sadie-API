@@ -14,8 +14,10 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         # Read permissions are allowed to any request
         if request.method in permissions.SAFE_METHODS:
             return True
-        # Write permissions require staff/admin
-        return request.user and request.user.is_authenticated and request.user.is_staff
+        # Write permissions require staff/admin or superuser
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.is_staff or request.user.is_superuser
 
 
 class TriviaQuestionSerializer(serializers.ModelSerializer):
@@ -37,19 +39,46 @@ class TriviaQuestionSerializer(serializers.ModelSerializer):
         """Return list of options, filtering out empty ones"""
         return obj.get_options()
     
-    def validate_correct_answer(self, value):
-        """Ensure correct_answer is within valid range"""
+    def to_internal_value(self, data):
+        """Convert options array to individual option fields if needed"""
+        # If frontend sends options as an array, convert to option_1, option_2, etc.
+        if 'options' in data and isinstance(data['options'], list):
+            options = data['options']
+            # Map array to individual fields - always set all fields when options array is provided
+            if len(options) > 0:
+                data['option_1'] = options[0]
+            if len(options) > 1:
+                data['option_2'] = options[1]
+            if len(options) > 2:
+                data['option_3'] = options[2]
+            else:
+                data['option_3'] = ''  # Clear if fewer than 3 options
+            if len(options) > 3:
+                data['option_4'] = options[3]
+            else:
+                data['option_4'] = ''  # Clear if fewer than 4 options
+            # Remove options array as it's not a model field
+            data.pop('options', None)
+        
+        return super().to_internal_value(data)
+    
+    def validate(self, attrs):
+        """Validate the entire object, including correct_answer range"""
+        # Count how many options are provided
         options_count = 2
-        if self.initial_data.get('option_3'):
+        if attrs.get('option_3'):
             options_count = 3
-        if self.initial_data.get('option_4'):
+        if attrs.get('option_4'):
             options_count = 4
         
-        if value >= options_count:
-            raise serializers.ValidationError(
-                f'correct_answer must be between 0 and {options_count - 1}'
-            )
-        return value
+        # Validate correct_answer is within range
+        correct_answer = attrs.get('correct_answer')
+        if correct_answer is not None and correct_answer >= options_count:
+            raise serializers.ValidationError({
+                'correct_answer': f'correct_answer must be between 0 and {options_count - 1}'
+            })
+        
+        return attrs
 
 
 class TriviaQuestionViewSet(viewsets.ModelViewSet):
