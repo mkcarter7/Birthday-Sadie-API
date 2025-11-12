@@ -16,6 +16,7 @@ from birthdayapi.views.guest_book import GuestBookEntryViewSet
 from birthdayapi.views.game_score import GameScoreViewSet
 from birthdayapi.views.badges import BadgeViewSet
 from birthdayapi.views.trivia import TriviaViewSet
+from birthdayapi.views.trivia_question import TriviaQuestionViewSet
 from birthdayapi.views.admin import check_admin_status
 from birthdayapi.views.timeline import PartyTimelineEventViewSet
 
@@ -28,6 +29,7 @@ router.register(r'api/guestbook', GuestBookEntryViewSet, basename='guestbookentr
 router.register(r'api/scores', GameScoreViewSet, basename='gamescore')
 router.register(r'api/badges', BadgeViewSet, basename='badge')
 router.register(r'api/trivia', TriviaViewSet, basename='trivia')
+router.register(r'api/trivia-questions', TriviaQuestionViewSet, basename='triviaquestion')
 router.register(r'api/timeline-events', PartyTimelineEventViewSet, basename='timelineevent')
 
 urlpatterns = [

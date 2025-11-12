@@ -1,11 +1,23 @@
 from rest_framework import viewsets, status, permissions, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Sum, Avg, Max, Count
 from django.contrib.auth.models import User
 from ..models import GameScore, Party
+
+
+class IsGameScoreOwnerOrAdmin(permissions.BasePermission):
+    """
+    Allow update/delete if the user is a staff/admin or the owner of the game score.
+    """
+    def has_object_permission(self, request, view, obj):
+        # Allow if user is staff/admin
+        if request.user and request.user.is_staff:
+            return True
+        # Allow if user is the score owner
+        return obj.user == request.user
 
 
 class GameScoreSerializer(serializers.ModelSerializer):
@@ -23,7 +35,14 @@ class GameScoreSerializer(serializers.ModelSerializer):
             'party', 'party_name', 'total_points', 'level', 'calculated_level', 
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['user', 'level', 'created_at', 'updated_at']
+        read_only_fields = ['level', 'created_at', 'updated_at']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        # Make user field writable for admins, read-only for others
+        if request and not request.user.is_staff:
+            self.fields['user'].read_only = True
     
     def get_calculated_level(self, obj):
         """Get the calculated level based on current points"""
@@ -37,6 +56,20 @@ class GameScoreViewSet(viewsets.ModelViewSet):
     """
     serializer_class = GameScoreSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action in ['update', 'partial_update', 'destroy']:
+            # Allow admins or score owners to update/delete
+            return [IsAuthenticated(), IsGameScoreOwnerOrAdmin()]
+        elif self.action == 'create':
+            # Any authenticated user can create scores
+            return [IsAuthenticated()]
+        else:
+            # Anyone authenticated can view (filtered by queryset)
+            return [IsAuthenticated()]
     
     def get_queryset(self):
         """Filter queryset based on user permissions"""
@@ -63,7 +96,9 @@ class GameScoreViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Automatically set the user and calculate level on creation"""
-        instance = serializer.save(user=self.request.user)
+        # If admin provided a user, use it; otherwise use request.user
+        user = serializer.validated_data.get('user', self.request.user)
+        instance = serializer.save(user=user)
         instance.level = instance.calculate_level()
         instance.save()
     
@@ -72,32 +107,6 @@ class GameScoreViewSet(viewsets.ModelViewSet):
         instance = serializer.save()
         instance.level = instance.calculate_level()
         instance.save()
-    
-    def update(self, request, *args, **kwargs):
-        """Override update to check permissions"""
-        instance = self.get_object()
-        
-        # Only allow owner or staff to update
-        if instance.user != request.user and not request.user.is_staff:
-            return Response(
-                {'error': 'You can only update your own scores.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        return super().update(request, *args, **kwargs)
-    
-    def destroy(self, request, *args, **kwargs):
-        """Override destroy to check permissions"""
-        instance = self.get_object()
-        
-        # Only allow owner or staff to delete
-        if instance.user != request.user and not request.user.is_staff:
-            return Response(
-                {'error': 'You can only delete your own scores.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        return super().destroy(request, *args, **kwargs)
     
     @action(detail=False, methods=['get'])
     def my_scores(self, request):
@@ -157,17 +166,10 @@ class GameScoreViewSet(viewsets.ModelViewSet):
                 'type': 'overall'
             })
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsGameScoreOwnerOrAdmin])
     def add_points(self, request, pk=None):
         """Add points to a specific game score"""
         score = self.get_object()
-        
-        # Only allow owner or staff to add points
-        if score.user != request.user and not request.user.is_staff:
-            return Response(
-                {'error': 'You can only add points to your own scores.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
         
         try:
             points_to_add = int(request.data.get('points', 0))

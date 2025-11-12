@@ -7,8 +7,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from birthday.authentication import FirebaseAuthentication
-from ..models import GameScore, Party
+from ..models import GameScore, Party, TriviaQuestion
 
 
 class TriviaPermission(permissions.BasePermission):
@@ -147,10 +148,10 @@ class TriviaViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def questions(self, request):
         """
-        Get personalized trivia questions for a party about the birthday person
+        Get trivia questions for a party from the database
         Query params:
         - party: Party ID (required)
-        - count: Number of questions (default: 6, max: 6)
+        - count: Number of questions (optional, returns all if not specified)
         """
         party_id = request.query_params.get('party')
         if not party_id:
@@ -168,24 +169,31 @@ class TriviaViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Get personalized questions for this party
-        questions = get_personalized_questions(party)
+        # Get active trivia questions for this party (or global questions if party is None)
+        questions_queryset = TriviaQuestion.objects.filter(
+            is_active=True
+        ).filter(
+            Q(party=party) | Q(party__isnull=True)
+        )
         
-        # Get question count (default 6, max 6 since we have 6 questions)
-        count = min(int(request.query_params.get('count', 6)), len(questions))
+        # Get question count if specified
+        count = request.query_params.get('count')
+        if count:
+            try:
+                count = int(count)
+                questions_queryset = questions_queryset[:count]
+            except ValueError:
+                pass
         
-        # Select questions (take first N)
-        selected_questions = questions[:count]
-        
-        # Remove correct_answer from response (only show options)
+        # Convert to list of dicts
         questions_for_frontend = []
-        for q in selected_questions:
+        for q in questions_queryset:
             questions_for_frontend.append({
-                'id': q['id'],
-                'category': q['category'],
-                'question': q['question'],
-                'options': q['options'],
-                'points': q['points']
+                'id': q.id,
+                'category': q.category,
+                'question': q.question,
+                'options': q.get_options(),
+                'points': q.points
             })
         
         return Response({
@@ -248,9 +256,13 @@ class TriviaViewSet(viewsets.ViewSet):
             defaults={'total_points': 0, 'level': 1}
         )
         
-        # Get personalized questions for this party to validate answers
-        party_questions = get_personalized_questions(party)
-        questions_dict = {q['id']: q for q in party_questions}
+        # Get trivia questions for this party from database
+        trivia_questions = TriviaQuestion.objects.filter(
+            is_active=True
+        ).filter(
+            Q(party=party) | Q(party__isnull=True)
+        )
+        questions_dict = {q.id: q for q in trivia_questions}
         
         # Validate answers and calculate points
         total_points_earned = 0
@@ -265,19 +277,19 @@ class TriviaViewSet(viewsets.ViewSet):
                 continue
             
             question = questions_dict[question_id]
-            is_correct = user_answer == question['correct_answer']
+            is_correct = user_answer == question.correct_answer
             
             if is_correct:
-                total_points_earned += question['points']
+                total_points_earned += question.points
                 correct_count += 1
             
             question_results.append({
                 'question_id': question_id,
-                'question': question['question'],
+                'question': question.question,
                 'your_answer': user_answer,
-                'correct_answer': question['correct_answer'],
+                'correct_answer': question.correct_answer,
                 'is_correct': is_correct,
-                'points_earned': question['points'] if is_correct else 0
+                'points_earned': question.points if is_correct else 0
             })
         
         # Update game score
@@ -307,8 +319,10 @@ class TriviaViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
     def categories(self, request):
-        """Get list of available trivia categories"""
-        categories = list(set(q['category'] for q in TRIVIA_QUESTION_TEMPLATES))
+        """Get list of available trivia categories from database"""
+        categories = list(TriviaQuestion.objects.filter(
+            is_active=True
+        ).values_list('category', flat=True).distinct())
         return Response({
             'categories': categories,
             'total_categories': len(categories)

@@ -14,11 +14,13 @@ from .guest_book import GuestBookEntryViewSet
 from .game_score import GameScoreViewSet
 from .badges import BadgeViewSet, UserBadgeViewSet
 from .timeline import PartyTimelineEventViewSet, PartyTimelineEventSerializer
+from .trivia_question import TriviaQuestionViewSet
 
 # Import serializers if needed elsewhere
 from .game_score import GameScoreSerializer
 from .guest_book import GuestBookEntrySerializer
 from .badges import BadgeSerializer, UserBadgeSerializer
+from .trivia_question import TriviaQuestionSerializer
 
 # Version info
 __version__ = '1.0.0'
@@ -36,6 +38,7 @@ __all__ = [
     'BadgeViewSet',
     'UserBadgeViewSet',
     'PartyTimelineEventViewSet',
+    'TriviaQuestionViewSet',
     
     # Serializers
     'GameScoreSerializer',
@@ -43,6 +46,7 @@ __all__ = [
     'BadgeSerializer',
     'UserBadgeSerializer',
     'PartyTimelineEventSerializer',
+    'TriviaQuestionSerializer',
 ]
 
 # ViewSet registry for programmatic access
@@ -56,4 +60,5 @@ VIEWSETS = {
     'badge': BadgeViewSet,
     'user_badge': UserBadgeViewSet,
     'timeline_event': PartyTimelineEventViewSet,
+    'trivia_question': TriviaQuestionViewSet,
 }

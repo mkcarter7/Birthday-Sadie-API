@@ -1,0 +1,182 @@
+[
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 1,
+    "fields": {
+      "party": 1,
+      "category": "Personal",
+      "question": "What color are Sadie's eyes?",
+      "option_1": "Blue",
+      "option_2": "Green",
+      "option_3": "Brown",
+      "option_4": "Hazel",
+      "correct_answer": 1,
+      "points": 10,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 2,
+    "fields": {
+      "party": 1,
+      "category": "Personal",
+      "question": "What is Sadie's favorite color?",
+      "option_1": "Pink",
+      "option_2": "Purple",
+      "option_3": "Blue",
+      "option_4": "Rainbow",
+      "correct_answer": 3,
+      "points": 15,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 3,
+    "fields": {
+      "party": 1,
+      "category": "Personal",
+      "question": "What is Sadie's favorite animal?",
+      "option_1": "Dog",
+      "option_2": "Cat",
+      "option_3": "Horse",
+      "option_4": "Unicorn",
+      "correct_answer": 2,
+      "points": 15,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 4,
+    "fields": {
+      "party": 1,
+      "category": "Party",
+      "question": "Where is Sadie's birthday party being held?",
+      "option_1": "Haley Meadows Farm",
+      "option_2": "The Park",
+      "option_3": "Her House",
+      "option_4": "A Restaurant",
+      "correct_answer": 0,
+      "points": 20,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 5,
+    "fields": {
+      "party": 1,
+      "category": "Personal",
+      "question": "How old is Sadie turning?",
+      "option_1": "5 years old",
+      "option_2": "6 years old",
+      "option_3": "7 years old",
+      "option_4": "8 years old",
+      "correct_answer": 1,
+      "points": 25,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 6,
+    "fields": {
+      "party": 1,
+      "category": "Fun",
+      "question": "What is Sadie's favorite thing to do?",
+      "option_1": "Play outside",
+      "option_2": "Read books",
+      "option_3": "Draw and color",
+      "option_4": "All of the above",
+      "correct_answer": 3,
+      "points": 15,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 7,
+    "fields": {
+      "party": null,
+      "category": "General",
+      "question": "What do you say to someone on their birthday?",
+      "option_1": "Happy Birthday!",
+      "option_2": "Merry Christmas!",
+      "option_3": "Happy New Year!",
+      "option_4": "Trick or Treat!",
+      "correct_answer": 0,
+      "points": 10,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 8,
+    "fields": {
+      "party": null,
+      "category": "General",
+      "question": "What do you typically put on top of a birthday cake?",
+      "option_1": "Candles",
+      "option_2": "Vegetables",
+      "option_3": "Toys",
+      "option_4": "Books",
+      "correct_answer": 0,
+      "points": 10,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 9,
+    "fields": {
+      "party": null,
+      "category": "General",
+      "question": "What is a common birthday party activity?",
+      "option_1": "Playing games",
+      "option_2": "Eating cake",
+      "option_3": "Opening presents",
+      "option_4": "All of the above",
+      "correct_answer": 3,
+      "points": 15,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "birthdayapi.triviaquestion",
+    "pk": 10,
+    "fields": {
+      "party": 1,
+      "category": "Party",
+      "question": "What time does Sadie's party start?",
+      "option_1": "12:00 PM",
+      "option_2": "2:00 PM",
+      "option_3": "4:00 PM",
+      "option_4": "6:00 PM",
+      "correct_answer": 0,
+      "points": 20,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  }
+]

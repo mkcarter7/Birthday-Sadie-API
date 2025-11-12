@@ -13,15 +13,12 @@ class IsPhotoOwnerOrAdmin(permissions.BasePermission):
     """
     Allow deletion if the user is a staff/admin or the uploader of the photo.
     """
-
     def has_object_permission(self, request, view, obj):
-        if request.method not in permissions.SAFE_METHODS and request.method != 'DELETE':
-            return False
-        if request.user and request.user.is_authenticated:
-            if request.user.is_staff:
-                return True
-            return obj.uploaded_by == request.user
-        return False
+        # Allow if user is staff/admin
+        if request.user and request.user.is_staff:
+            return True
+        # Allow if user is the photo owner
+        return obj.uploaded_by == request.user
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
@@ -72,9 +69,9 @@ class PartyPhotoViewSet(viewsets.ModelViewSet):
         # Anyone can view photos
         if self.action in ['list', 'retrieve', 'party_gallery']:
             return [AllowAny()]
-        # allow owner or admin to delete
+        # Allow owner or admin to delete (must be authenticated)
         elif self.action in ['destroy']:
-            return [IsPhotoOwnerOrAdmin()]
+            return [IsAuthenticated(), IsPhotoOwnerOrAdmin()]
         # Authenticated users can upload and like
         else:
             return [IsAuthenticated()]

@@ -5,6 +5,7 @@ from .guest_book import GuestBookEntry
 from .gift_registry import GiftRegistryItem
 from .badges import Badge, UserBadge
 from .game_score import GameScore
+from .trivia import TriviaQuestion
 
 __all__ = [
     'Party',
@@ -17,4 +18,5 @@ __all__ = [
     'UserBadge',
     'GameScore',
     'PartyTimelineEvent',
+    'TriviaQuestion',
 ]

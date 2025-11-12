@@ -10,6 +10,7 @@ from .models import (
     UserBadge,
     GameScore,
     PartyTimelineEvent,
+    TriviaQuestion,
 )
 
 # Register Party model
@@ -100,3 +101,27 @@ class PartyTimelineEventAdmin(admin.ModelAdmin):
     list_filter = ['party', 'is_active']
     search_fields = ['activity', 'description', 'party__name']
     ordering = ['party', 'time']
+
+# Register TriviaQuestion model
+@admin.register(TriviaQuestion)
+class TriviaQuestionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'party', 'category', 'question', 'points', 'is_active']
+    list_filter = ['category', 'is_active', 'party']
+    search_fields = ['question', 'category', 'party__name']
+    fieldsets = (
+        ('Question Details', {
+            'fields': ('party', 'category', 'question', 'is_active')
+        }),
+        ('Answer Options', {
+            'fields': ('option_1', 'option_2', 'option_3', 'option_4', 'correct_answer')
+        }),
+        ('Scoring', {
+            'fields': ('points',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['category', 'question']

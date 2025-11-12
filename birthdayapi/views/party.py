@@ -1,11 +1,23 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework import permissions
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ..models import Party
 from rest_framework import serializers
+
+class IsPartyHostOrAdmin(permissions.BasePermission):
+    """
+    Allow update/delete if the user is a staff/admin or the host of the party.
+    """
+    def has_object_permission(self, request, view, obj):
+        # Allow if user is staff/admin
+        if request.user and request.user.is_staff:
+            return True
+        # Allow if user is the party host
+        return obj.host == request.user
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
@@ -41,11 +53,15 @@ class PartyViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated]
+        if self.action in ['update', 'partial_update', 'destroy']:
+            # Allow admins or party hosts to update/delete
+            return [IsAuthenticated(), IsPartyHostOrAdmin()]
+        elif self.action == 'create':
+            # Any authenticated user can create a party
+            return [IsAuthenticated()]
         else:
-            permission_classes = [AllowAny]
-        return [permission() for permission in permission_classes]
+            # Anyone can view parties
+            return [AllowAny()]
     
     def get_queryset(self):
         queryset = Party.objects.all()
