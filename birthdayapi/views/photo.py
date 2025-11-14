@@ -46,7 +46,7 @@ class PartyPhotoSerializer(serializers.ModelSerializer):
     
     def get_is_liked(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
             return obj.likes.filter(user=request.user).exists()
         return False
 
@@ -60,7 +60,7 @@ class PhotoLikeSerializer(serializers.ModelSerializer):
 
 class PartyPhotoViewSet(viewsets.ModelViewSet):
     serializer_class = PartyPhotoSerializer
-    permission_classes = [IsAuthenticated]  # Default to authenticated
+    permission_classes = [AllowAny]  # Default to allow anyone to view
     
     def get_permissions(self):
         """
@@ -96,17 +96,42 @@ class PartyPhotoViewSet(viewsets.ModelViewSet):
         
         return queryset.select_related('uploaded_by', 'party').prefetch_related('likes')
     
+    def create(self, request, *args, **kwargs):
+        """Override create to provide better error messages"""
+        # Check authentication first
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {"error": "Authentication required. Please log in to upload photos."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        return super().create(request, *args, **kwargs)
+    
     def perform_create(self, serializer):
-        # User is already authenticated due to permission classes
+        # User is already authenticated due to permission classes and create() check
         party_id = self.request.data.get('party')
         if not party_id:
-            raise serializers.ValidationError("Party ID is required")
+            raise serializers.ValidationError({"party": "Party ID is required"})
         
-        party = get_object_or_404(Party, id=party_id)
+        try:
+            party = Party.objects.get(id=party_id)
+        except Party.DoesNotExist:
+            raise serializers.ValidationError({"party": f"Party with ID {party_id} does not exist"})
+        
+        # Validate that image is provided
+        if 'image' not in self.request.data and 'image' not in self.request.FILES:
+            raise serializers.ValidationError({"image": "Image file is required"})
+        
         serializer.save(uploaded_by=self.request.user, party=party)
     
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to like photos'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
         photo = self.get_object()
         like, created = PhotoLike.objects.get_or_create(
             user=request.user,
@@ -126,6 +151,12 @@ class PartyPhotoViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['delete'])
     def unlike(self, request, pk=None):
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required to unlike photos'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
         photo = self.get_object()
         
         try:
