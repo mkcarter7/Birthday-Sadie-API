@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'birthdayapi',
-    'birthdaysadieapi'
 ]
 
 # REMOVED: Old CORS_ORIGIN_WHITELIST syntax (conflicts with CORS_ALLOWED_ORIGINS)
