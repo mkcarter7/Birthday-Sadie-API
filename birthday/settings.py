@@ -29,8 +29,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-u&9pi^=v(*69x^^$bjk^vokl9(
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 # Heroku sets this automatically, but allow manual override
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
+# Default to localhost for local development, but require ALLOWED_HOSTS to be set in production
+ALLOWED_HOSTS_STR = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_STR.split(',') if host.strip()]
 
 
 # Application definition
@@ -89,7 +90,7 @@ WSGI_APPLICATION = 'birthday.wsgi.application'
 
 # Database configuration - use PostgreSQL on Heroku, SQLite for local development
 if os.getenv('DATABASE_URL'):
-    import dj_database_url
+    import dj_database_url  # type: ignore
     DATABASES = {
         'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
     }
