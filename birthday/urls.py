@@ -19,6 +19,7 @@ from birthdayapi.views.trivia import TriviaViewSet
 from birthdayapi.views.trivia_question import TriviaQuestionViewSet
 from birthdayapi.views.admin import check_admin_status
 from birthdayapi.views.timeline import PartyTimelineEventViewSet
+from birthdayapi.views.api_root import api_root
 
 router = DefaultRouter()
 router.register(r'api/parties', PartyViewSet, basename='party')
@@ -34,6 +35,9 @@ router.register(r'api/timeline-events', PartyTimelineEventViewSet, basename='tim
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    # API root
+    path('api/', api_root, name='api-root'),
     
     path('api/auth/', include('rest_framework.urls')),
     path('api/token/', obtain_auth_token, name='api_token_auth'),
