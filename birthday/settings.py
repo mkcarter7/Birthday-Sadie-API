@@ -186,5 +186,11 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Media files settings
-MEDIA_URL = '/media/'
+# Use absolute URL in production (Heroku), relative in development
+if os.getenv('DATABASE_URL'):  # On Heroku, DATABASE_URL is set
+    # Production: Use full Heroku URL for media files
+    MEDIA_URL = f'https://{os.getenv("ALLOWED_HOSTS", "").split(",")[0].strip()}/media/' if os.getenv('ALLOWED_HOSTS') else '/media/'
+else:
+    # Development: Use relative URL
+    MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
