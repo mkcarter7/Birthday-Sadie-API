@@ -163,10 +163,10 @@ REST_FRAMEWORK = {
 
 # CORS settings
 # Parse CORS origins from environment variable (comma-separated)
-# Default to localhost for development, plus Vercel deployment URL
+# Default to localhost for development, plus Render/Vercel deployment URLs
 CORS_ORIGINS_STR = os.getenv(
     'CORS_ALLOWED_ORIGINS', 
-    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000,https://birthday-sadie-client.vercel.app'
+    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000'
 )
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_STR.split(',') if origin.strip()]
 
@@ -186,10 +186,18 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Media files settings
-# Use absolute URL in production (Heroku), relative in development
-if os.getenv('DATABASE_URL'):  # On Heroku, DATABASE_URL is set
-    # Production: Use full Heroku URL for media files
-    MEDIA_URL = f'https://{os.getenv("ALLOWED_HOSTS", "").split(",")[0].strip()}/media/' if os.getenv('ALLOWED_HOSTS') else '/media/'
+# Use absolute URL in production (Heroku/Render), relative in development
+if os.getenv('DATABASE_URL'):  # Production (Heroku/Render)
+    # Get the service URL from Render or Heroku
+    render_service_url = os.getenv('RENDER_SERVICE_URL')  # Render sets this
+    if render_service_url:
+        MEDIA_URL = f'{render_service_url}/media/'
+    elif os.getenv('ALLOWED_HOSTS'):
+        # Fallback to Heroku-style URL
+        host = os.getenv("ALLOWED_HOSTS", "").split(",")[0].strip()
+        MEDIA_URL = f'https://{host}/media/' if host else '/media/'
+    else:
+        MEDIA_URL = '/media/'
 else:
     # Development: Use relative URL
     MEDIA_URL = '/media/'

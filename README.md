@@ -87,9 +87,12 @@ This allows you to access the Django admin panel at `/admin/`.
 
 ### 6. Run the Development Server
 
+**On Windows/Linux/Mac (Local Development):**
 ```bash
 python manage.py runserver
 ```
+
+**Note:** The `gunicorn` command in `Procfile` is only for production deployment on Linux/Unix servers (Render, Heroku). It will **not work on Windows** because it requires Unix-only modules. Always use `python manage.py runserver` for local development.
 
 The API will be available at `http://localhost:8000`
 

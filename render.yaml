@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: birthday-sadie-api
+    runtime: python
+    plan: starter
+    buildCommand: pipenv install && pipenv run python manage.py collectstatic --noinput
+    startCommand: pipenv run gunicorn birthday.wsgi --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: birthday-sadie-db
+          property: connectionString
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+
+databases:
+  - name: birthday-sadie-db
+    plan: starter
+    databaseName: birthday_sadie
+    user: birthday_sadie_user
