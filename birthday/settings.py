@@ -144,8 +144,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise for serving static files on Heroku/Render
-# Using CompressedStaticFilesStorage instead of Manifest to avoid manifest issues
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -187,7 +186,10 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Media files settings
-# Use absolute URL in production (Heroku/Render), relative in development
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# For production, use absolute URL for media files
 if os.getenv('DATABASE_URL'):  # Production (Heroku/Render)
     # Get the service URL from Render or Heroku
     render_service_url = os.getenv('RENDER_SERVICE_URL')  # Render sets this
@@ -197,12 +199,6 @@ if os.getenv('DATABASE_URL'):  # Production (Heroku/Render)
         # Fallback to Heroku-style URL
         host = os.getenv("ALLOWED_HOSTS", "").split(",")[0].strip()
         MEDIA_URL = f'https://{host}/media/' if host else '/media/'
-    else:
-        MEDIA_URL = '/media/'
-else:
-    # Development: Use relative URL
-    MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 # Logging configuration
 LOGGING = {
