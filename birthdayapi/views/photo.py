@@ -35,6 +35,7 @@ class PartyPhotoSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     party_name = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()  # Override to return absolute URL
     
     class Meta:
         model = PartyPhoto
@@ -42,7 +43,7 @@ class PartyPhotoSerializer(serializers.ModelSerializer):
             'id', 'party', 'image', 'caption', 'uploaded_at', 'uploaded_by',
             'likes_count', 'is_liked', 'is_featured', 'party_name'
         ]
-        read_only_fields = ['id', 'uploaded_by', 'uploaded_at', 'likes_count']
+        read_only_fields = ['id', 'uploaded_by', 'uploaded_at', 'likes_count', 'image']
     
     def get_likes_count(self, obj):
         """Safely get likes count"""
@@ -67,6 +68,20 @@ class PartyPhotoSerializer(serializers.ModelSerializer):
                 # If there's any error checking likes, just return False
                 return False
         return False
+    
+    def get_image(self, obj):
+        """Return absolute URL for image in production"""
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            # Fallback: construct absolute URL from settings
+            from django.conf import settings
+            if hasattr(settings, 'ALLOWED_HOSTS') and settings.ALLOWED_HOSTS:
+                host = settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'localhost'
+                protocol = 'https' if not settings.DEBUG else 'http'
+                return f'{protocol}://{host}{obj.image.url}'
+        return None
 
 class PhotoLikeSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -290,6 +305,7 @@ class PartyPhotoSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     party_name = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()  # Override to return absolute URL
     
     class Meta:
         model = PartyPhoto
@@ -297,7 +313,7 @@ class PartyPhotoSerializer(serializers.ModelSerializer):
             'id', 'party', 'image', 'caption', 'uploaded_at', 'uploaded_by',
             'likes_count', 'is_liked', 'is_featured', 'party_name'
         ]
-        read_only_fields = ['id', 'uploaded_by', 'uploaded_at', 'likes_count']
+        read_only_fields = ['id', 'uploaded_by', 'uploaded_at', 'likes_count', 'image']
     
     def get_likes_count(self, obj):
         """Safely get likes count"""
@@ -322,6 +338,20 @@ class PartyPhotoSerializer(serializers.ModelSerializer):
                 # If there's any error checking likes, just return False
                 return False
         return False
+    
+    def get_image(self, obj):
+        """Return absolute URL for image in production"""
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            # Fallback: construct absolute URL from settings
+            from django.conf import settings
+            if hasattr(settings, 'ALLOWED_HOSTS') and settings.ALLOWED_HOSTS:
+                host = settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'localhost'
+                protocol = 'https' if not settings.DEBUG else 'http'
+                return f'{protocol}://{host}{obj.image.url}'
+        return None
 
 class PhotoLikeSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
