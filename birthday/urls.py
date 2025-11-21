@@ -47,15 +47,29 @@ urlpatterns = [
 ]
 
 # Serve media files in both development and production
-# In production, we'll use WhiteNoise or a simple view
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 else:
     # In production, serve media files through Django
-    # Note: For production with many/large files, consider using S3 or similar
+    # Note: Render's filesystem is ephemeral - files will be lost on redeploy
+    # For production with many/large files, consider using S3 or similar
     from django.views.static import serve
     from django.urls import re_path
+    from django.views.decorators.cache import never_cache
+    from django.http import Http404
+    
+    def serve_media(request, path):
+        """Serve media files in production"""
+        try:
+            return serve(request, path, document_root=settings.MEDIA_ROOT, show_indexes=False)
+        except Http404:
+            # Log 404s for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Media file not found: {path}")
+            raise
+    
     urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+        re_path(r'^media/(?P<path>.*)$', never_cache(serve_media)),
     ]

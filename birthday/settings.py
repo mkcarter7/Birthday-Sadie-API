@@ -186,19 +186,13 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Media files settings
+# Always use relative URL for URL routing
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# For production, use absolute URL for media files
-if os.getenv('DATABASE_URL'):  # Production (Heroku/Render)
-    # Get the service URL from Render or Heroku
-    render_service_url = os.getenv('RENDER_SERVICE_URL')  # Render sets this
-    if render_service_url:
-        MEDIA_URL = f'{render_service_url}/media/'
-    elif os.getenv('ALLOWED_HOSTS'):
-        # Fallback to Heroku-style URL
-        host = os.getenv("ALLOWED_HOSTS", "").split(",")[0].strip()
-        MEDIA_URL = f'https://{host}/media/' if host else '/media/'
+# Note: In production, media files are served through Django's serve view
+# For production with many/large files, consider using S3 or cloud storage
+# Render's filesystem is ephemeral - files will be lost on redeploy
 
 # Logging configuration
 LOGGING = {
