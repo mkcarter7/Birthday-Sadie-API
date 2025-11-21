@@ -4,7 +4,6 @@ from django.conf import settings
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import uuid
 
 
 class Migration(migrations.Migration):
@@ -31,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Party',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200)),
                 ('description', models.TextField(blank=True)),
                 ('date', models.DateTimeField()),
