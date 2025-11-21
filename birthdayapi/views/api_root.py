@@ -22,7 +22,7 @@ def api_root(request, format=None):
             'guestbook': reverse('guestbookentry-list', request=request, format=format),
             'scores': reverse('gamescore-list', request=request, format=format),
             'badges': reverse('badge-list', request=request, format=format),
-            'trivia': reverse('trivia-questions', request=request, format=format),
+            'trivia': reverse('trivia-list', request=request, format=format),
             'trivia-questions': reverse('triviaquestion-list', request=request, format=format),
             'timeline-events': reverse('timelineevent-list', request=request, format=format),
             'check-admin': reverse('check_admin_status', request=request, format=format),
