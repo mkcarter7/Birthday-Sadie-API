@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PartyPhoto',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('image', models.ImageField(upload_to='party_photos/%Y/%m/%d/')),
                 ('caption', models.TextField(blank=True)),
                 ('uploaded_at', models.DateTimeField(auto_now_add=True)),
