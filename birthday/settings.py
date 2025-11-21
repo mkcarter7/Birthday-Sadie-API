@@ -230,3 +230,9 @@ LOGGING = {
         },
     },
 }
+# CORS settings
+CORS_ORIGINS_STR = os.getenv(
+    'CORS_ALLOWED_ORIGINS', 
+    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000,https://birthday-sadie-client.vercel.app'
+)
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_STR.split(',') if origin.strip()]
