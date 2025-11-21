@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: starter
     buildCommand: pipenv install && pipenv run python manage.py collectstatic --noinput
-    startCommand: pipenv run gunicorn birthday.wsgi --bind 0.0.0.0:$PORT
+    startCommand: source .venv/bin/activate && gunicorn birthday.wsgi --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
