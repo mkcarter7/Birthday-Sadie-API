@@ -193,8 +193,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Note: In production, media files are served through Django's serve view
-# For production with many/large files, consider using S3 or cloud storage
-# Render's filesystem is ephemeral - files will be lost on redeploy
+# Railway provides persistent disk storage, so files persist across redeploys
+# For other platforms (Render, Heroku), consider using S3 or cloud storage
 
 # Logging configuration
 LOGGING = {

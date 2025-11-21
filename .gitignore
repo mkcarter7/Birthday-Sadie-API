@@ -162,5 +162,7 @@ cython_debug/
 # Documentation files
 *.md
 !README.md
+!*_DEPLOY.md
+!*_QUICK_START.md
 
 firebase-service-account.json
